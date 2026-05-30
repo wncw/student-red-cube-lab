@@ -35,6 +35,8 @@ git --version
 
 `git version ...`처럼 버전이 나오면 정상입니다.
 
+설치했는데도 `git` 명령어가 인식되지 않으면 PowerShell을 완전히 닫고 다시 열어보세요. 그래도 안 되면 [Git 설치 후 명령어가 인식되지 않음](docs/TROUBLESHOOTING.md#git-설치-후-명령어가-인식되지-않음)을 확인합니다.
+
 ### Git으로 내려받기
 
 Windows PowerShell, macOS Terminal, Linux Terminal에서 아래 명령어를 실행합니다.
