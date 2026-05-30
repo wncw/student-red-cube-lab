@@ -17,7 +17,44 @@
 - Python 3.9 이상 권장
 - macOS, Windows, Linux 중 하나
 
-## 설치
+## 코드 내려받기
+
+### Windows에서 Git 설치
+
+PowerShell을 열고 아래 명령어를 실행합니다.
+
+```powershell
+winget install --id Git.Git -e --source winget
+```
+
+설치가 끝나면 PowerShell을 완전히 닫고 다시 엽니다. 그다음 Git이 설치되었는지 확인합니다.
+
+```powershell
+git --version
+```
+
+`git version ...`처럼 버전이 나오면 정상입니다.
+
+### Git으로 내려받기
+
+Windows PowerShell, macOS Terminal, Linux Terminal에서 아래 명령어를 실행합니다.
+
+```bash
+git clone https://github.com/wncw/student-red-cube-lab.git
+cd student-red-cube-lab
+```
+
+### Git 설치가 안 될 때
+
+수업 중 Git 설치가 오래 걸리면 ZIP으로 받아도 됩니다.
+
+1. https://github.com/wncw/student-red-cube-lab 접속
+2. 초록색 `Code` 버튼 클릭
+3. `Download ZIP` 클릭
+4. 압축 해제
+5. 압축을 푼 폴더에서 Terminal 또는 PowerShell 실행
+
+## Python 환경 설치
 
 ```bash
 python3 -m venv .venv
@@ -26,7 +63,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Windows PowerShell에서는 가상환경 활성화 명령이 다릅니다.
+Windows PowerShell에서는 아래 명령어를 사용합니다.
 
 ```powershell
 python -m venv .venv
@@ -141,4 +178,3 @@ End-to-End 방식에서는 `cube_x`, `cube_y`를 직접 계산하지 않습니�
 실습 중 기록할 내용은 [docs/WORKSHEET.md](docs/WORKSHEET.md)를 사용하세요.
 
 문제가 생기면 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)를 먼저 확인하세요.
-
