@@ -143,11 +143,11 @@ macOS에서 문제가 계속되면 backend를 명시합니다.
 python scripts/direct_red_cube_tracker.py --camera 0 --backend avfoundation
 ```
 
-## Innomaker 1080p 카메라가 1920x1080으로 안 잡힘
+## 카메라 해상도가 1280x720으로 안 잡힘
 
 일부 UVC 카메라는 요청한 해상도를 그대로 쓰지 않을 수 있습니다. `inspect_camera.py` 출력의 `actual=...` 값을 확인합니다.
 
-수업에서는 1280x720도 충분합니다.
+수업 기본값은 1280x720입니다. 실제 카메라가 다른 해상도로 잡혀도 화면이 정상적으로 나오면 그대로 진행할 수 있습니다.
 
 ```bash
 python scripts/direct_red_cube_tracker.py --camera 0 --width 1280 --height 720

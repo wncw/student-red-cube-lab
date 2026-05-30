@@ -12,7 +12,7 @@
 
 ## 준비물
 
-- Innomaker 1080p USB/UVC camera module
+- 카메라
 - 빨간색 정육면체 큐브
 - Python 3.9 이상 권장
 - macOS, Windows, Linux 중 하나
@@ -94,7 +94,7 @@ python scripts/inspect_camera.py --max-index 6
 ## 2. OpenCV 직접 방식 실행
 
 ```bash
-python scripts/direct_red_cube_tracker.py --camera 0 --width 1920 --height 1080 --fps 30 --show-mask
+python scripts/direct_red_cube_tracker.py --camera 0 --width 1280 --height 720 --fps 30 --show-mask
 ```
 
 키:

@@ -23,8 +23,8 @@ DEFAULT_THRESHOLDS = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Track a red cube with OpenCV HSV thresholding.")
     parser.add_argument("--camera", type=int, default=0, help="Camera index.")
-    parser.add_argument("--width", type=int, default=1920, help="Requested capture width.")
-    parser.add_argument("--height", type=int, default=1080, help="Requested capture height.")
+    parser.add_argument("--width", type=int, default=1280, help="Requested capture width.")
+    parser.add_argument("--height", type=int, default=720, help="Requested capture height.")
     parser.add_argument("--fps", type=int, default=30, help="Requested FPS.")
     parser.add_argument("--backend", default="auto", choices=["auto", "avfoundation", "dshow", "v4l2"])
     parser.add_argument("--min-area", type=int, default=800, help="Ignore red contours smaller than this area.")
@@ -169,4 +169,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

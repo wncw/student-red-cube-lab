@@ -11,7 +11,7 @@
 실행:
 
 ```bash
-python scripts/direct_red_cube_tracker.py --camera 0 --width 1920 --height 1080 --fps 30 --show-mask
+python scripts/direct_red_cube_tracker.py --camera 0 --width 1280 --height 720 --fps 30 --show-mask
 ```
 
 관찰한 값:
@@ -132,4 +132,3 @@ image + state -> neural network -> action
 ```text
 camera image + robot state -> motor action
 ```
-
