@@ -71,6 +71,54 @@ git --version
 4. 압축 해제
 5. 압축을 푼 폴더에서 PowerShell 실행
 
+## PowerShell에서 Activate.ps1 보안 오류가 발생함
+
+증상:
+
+```text
+PSSecurityException
+```
+
+또는:
+
+```text
+running scripts is disabled on this system
+```
+
+Windows PowerShell의 실행 정책 때문에 가상환경 활성화 스크립트가 막힌 상태입니다. Python 가상환경이 잘못 만들어진 것이 아닙니다.
+
+### 방법 1. 현재 PowerShell 창에서만 임시 허용
+
+PowerShell에서 아래 명령어를 실행합니다.
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+그다음 다시 가상환경을 활성화합니다.
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+이 설정은 현재 PowerShell 창에서만 적용됩니다. 창을 닫으면 원래 상태로 돌아갑니다.
+
+### 방법 2. activate 없이 바로 실행
+
+실행 정책을 바꾸고 싶지 않으면 가상환경 안의 Python을 직접 사용해도 됩니다.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe scripts\inspect_camera.py --max-index 6
+```
+
+이후 다른 script도 같은 방식으로 실행할 수 있습니다.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\direct_red_cube_tracker.py --camera 0 --width 1280 --height 720 --show-mask
+```
+
 ## 카메라가 열리지 않음
 
 증상:

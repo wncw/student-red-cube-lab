@@ -74,6 +74,15 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+`Activate.ps1` 실행 중 `PSSecurityException` 보안 오류가 나오면 아래 명령어를 먼저 실행한 뒤 다시 activate 합니다.
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+그래도 막히면 activate 없이 `.venv`의 Python을 직접 실행할 수 있습니다. 자세한 방법은 [PowerShell에서 Activate.ps1 보안 오류가 발생함](docs/TROUBLESHOOTING.md#powershell에서-activateps1-보안-오류가-발생함)을 확인합니다.
+
 ## 1. 카메라 번호 확인
 
 ```bash
