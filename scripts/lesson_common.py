@@ -119,6 +119,16 @@ def draw_crosshair(frame: np.ndarray, x: int, y: int, color: Tuple[int, int, int
     cv2.circle(frame, (x, y), 6, color, 2, cv2.LINE_AA)
 
 
+def draw_virtual_gripper(frame: np.ndarray, cursor_x: float, cursor_y: float) -> Tuple[int, int]:
+    height, width = frame.shape[:2]
+    cursor_px = int(clamp01(cursor_x) * (width - 1))
+    cursor_py = int(clamp01(cursor_y) * (height - 1))
+    color = (255, 255, 0)
+    draw_crosshair(frame, cursor_px, cursor_py, color)
+    cv2.rectangle(frame, (cursor_px - 36, cursor_py - 36), (cursor_px + 36, cursor_py + 36), color, 2)
+    return cursor_px, cursor_py
+
+
 def clamp01(value: float) -> float:
     return max(0.0, min(1.0, value))
 
@@ -133,4 +143,3 @@ def read_csv_rows(path: Path) -> List[Dict[str, str]]:
 
     with path.open("r", newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
-

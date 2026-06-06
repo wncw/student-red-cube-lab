@@ -105,12 +105,16 @@ python scripts/direct_red_cube_tracker.py --camera 0 --width 1280 --height 720 -
 | `s` | screenshot 저장 |
 | `t` | HSV tuning 창 켜기/끄기 |
 | `m` | mask 화면 켜기/끄기 |
+| `g` | 가상 gripper 이동 화살표 켜기/끄기 |
 
 관찰할 것:
 
 - 큐브를 움직이면 중심 좌표가 어떻게 바뀌는가
+- 큐브가 화면 중앙보다 왼쪽/오른쪽/위/아래에 있을 때 action 화살표가 어떻게 바뀌는가
 - 조명이 바뀌면 mask가 어떻게 바뀌는가
 - 빨간색 다른 물체를 넣으면 무엇을 큐브로 착각하는가
+
+화면 중앙의 십자는 가상의 gripper 목표점입니다. 빨간 큐브가 중앙보다 왼쪽에 있으면 `MOVE LEFT`, 오른쪽에 있으면 `MOVE RIGHT`처럼 표시됩니다. 중앙 허용 범위 안에 들어오면 `CENTERED - CLOSE`가 표시됩니다.
 
 ## 3. End-to-End Dataset 수집
 
@@ -147,7 +151,7 @@ close  40장 이상
 ## 4. 모델 학습
 
 ```bash
-python scripts/train_e2e_policy.py --dataset data/e2e_red_cube --epochs 12 --model-out models/e2e_red_cube_policy.pt
+python scripts/train_e2e_policy.py --dataset data/e2e_red_cube --epochs 20 --model-out models/e2e_red_cube_policy.pt
 ```
 
 학습이 끝나면 `models/e2e_red_cube_policy.pt` 파일이 생성됩니다.

@@ -20,6 +20,15 @@ DEFAULT_THRESHOLDS = {
 }
 
 
+CONTROL_COLORS = {
+    "MOVE LEFT": (255, 180, 0),
+    "MOVE RIGHT": (255, 180, 0),
+    "MOVE UP": (255, 180, 0),
+    "MOVE DOWN": (255, 180, 0),
+    "CENTERED - CLOSE": (0, 255, 0),
+}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Track a red cube with OpenCV HSV thresholding.")
     parser.add_argument("--camera", type=int, default=0, help="Camera index.")
@@ -30,6 +39,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-area", type=int, default=800, help="Ignore red contours smaller than this area.")
     parser.add_argument("--display-width", type=int, default=1280, help="Resize window for display only.")
     parser.add_argument("--show-mask", action="store_true", help="Show threshold mask next to camera frame.")
+    parser.add_argument("--control-threshold", type=int, default=40, help="Pixel tolerance around the screen center.")
+    parser.add_argument("--hide-control-arrow", action="store_true", help="Hide the virtual gripper control arrow overlay.")
     parser.add_argument("--out-dir", type=Path, default=Path("outputs/direct_tracker"))
     return parser.parse_args()
 
@@ -92,6 +103,62 @@ def read_tuning_values() -> Dict[str, int]:
     }
 
 
+def choose_control_action(dx: int, dy: int, threshold: int) -> str:
+    if abs(dx) <= threshold and abs(dy) <= threshold:
+        return "CENTERED - CLOSE"
+    if abs(dx) >= abs(dy):
+        return "MOVE RIGHT" if dx > 0 else "MOVE LEFT"
+    return "MOVE DOWN" if dy > 0 else "MOVE UP"
+
+
+def draw_control_overlay(
+    frame: np.ndarray,
+    cube_center: Optional[Tuple[int, int]],
+    threshold: int,
+) -> Tuple[str, int, int]:
+    height, width = frame.shape[:2]
+    target_x = width // 2
+    target_y = height // 2
+    cv2.circle(frame, (target_x, target_y), threshold, (255, 255, 0), 2, cv2.LINE_AA)
+    draw_crosshair(frame, target_x, target_y, (255, 255, 0))
+    cv2.putText(
+        frame,
+        "virtual gripper target",
+        (max(8, target_x - 150), max(28, target_y - threshold - 14)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.65,
+        (255, 255, 0),
+        2,
+        cv2.LINE_AA,
+    )
+
+    if cube_center is None:
+        return "NO TARGET", 0, 0
+
+    cube_x, cube_y = cube_center
+    dx = cube_x - target_x
+    dy = cube_y - target_y
+    action = choose_control_action(dx, dy, threshold)
+    color = CONTROL_COLORS[action]
+
+    if action == "CENTERED - CLOSE":
+        cv2.circle(frame, (target_x, target_y), threshold + 12, color, 3, cv2.LINE_AA)
+    else:
+        cv2.arrowedLine(frame, (target_x, target_y), (cube_x, cube_y), color, 5, cv2.LINE_AA, tipLength=0.18)
+
+    cv2.putText(
+        frame,
+        action,
+        (32, height - 34),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1.15,
+        color,
+        3,
+        cv2.LINE_AA,
+    )
+    return action, dx, dy
+
+
 def main() -> None:
     args = parse_args()
     ensure_dir(args.out_dir)
@@ -99,10 +166,11 @@ def main() -> None:
     cap = open_camera(args.camera, args.width, args.height, args.fps, args.backend)
     thresholds = dict(DEFAULT_THRESHOLDS)
     show_mask = args.show_mask
+    show_control_arrow = not args.hide_control_arrow
     tuning = False
     window_name = "Direct OpenCV red cube tracker"
 
-    print("Controls: q/ESC quit, s screenshot, t HSV tuning, m show/hide mask")
+    print("Controls: q/ESC quit, s screenshot, t HSV tuning, m show/hide mask, g show/hide control arrow")
     try:
         while True:
             ok, frame = cap.read()
@@ -117,15 +185,27 @@ def main() -> None:
             result = largest_red_square(mask, args.min_area)
 
             display = frame.copy()
+            cube_center = None
             if result is None:
                 status = "not detected"
-                draw_text_panel(display, ["Direct OpenCV tracker", "red cube: not detected", "press t to tune HSV"])
+                action, dx, dy = draw_control_overlay(display, None, args.control_threshold) if show_control_arrow else ("NO TARGET", 0, 0)
+                draw_text_panel(
+                    display,
+                    [
+                        "Direct OpenCV tracker",
+                        "red cube: not detected",
+                        f"control action: {action}",
+                        "press t to tune HSV",
+                    ],
+                )
             else:
                 x, y, w, h, area = result
                 cx = x + w // 2
                 cy = y + h // 2
+                cube_center = (cx, cy)
                 cv2.rectangle(display, (x, y), (x + w, y + h), (0, 255, 0), 3)
                 draw_crosshair(display, cx, cy, (0, 255, 255))
+                action, dx, dy = draw_control_overlay(display, cube_center, args.control_threshold) if show_control_arrow else ("HIDDEN", 0, 0)
                 cv2.putText(display, f"center=({cx}, {cy}) area={area:.0f}", (x, max(28, y - 12)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
                 status = f"center=({cx}, {cy}) area={area:.0f}"
                 draw_text_panel(
@@ -133,6 +213,7 @@ def main() -> None:
                     [
                         "Direct OpenCV tracker",
                         f"red cube: {status}",
+                        f"control action: {action} dx={dx} dy={dy}",
                         f"HSV red: H {thresholds['h1_low']}-{thresholds['h1_high']} or {thresholds['h2_low']}-{thresholds['h2_high']}",
                         f"S>={thresholds['s_low']} V>={thresholds['v_low']}",
                     ],
@@ -155,6 +236,8 @@ def main() -> None:
                 print(f"Saved screenshot: {path}")
             if key == ord("m"):
                 show_mask = not show_mask
+            if key == ord("g"):
+                show_control_arrow = not show_control_arrow
             if key == ord("t"):
                 tuning = not tuning
                 if tuning:

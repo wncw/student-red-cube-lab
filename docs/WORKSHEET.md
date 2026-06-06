@@ -20,6 +20,9 @@ python scripts/direct_red_cube_tracker.py --camera 0 --width 1280 --height 720 -
 center_x =
 center_y =
 area =
+control_action =
+dx =
+dy =
 ```
 
 ### 질문
@@ -28,6 +31,20 @@ area =
 2. 큐브를 카메라에 가까이 가져가면 `area`는 어떻게 변했나요?
 3. 손으로 그림자를 만들었을 때 mask는 안정적이었나요?
 4. 빨간색 다른 물체를 넣으면 tracker는 무엇을 큐브로 보나요?
+5. 큐브가 화면 중앙보다 왼쪽에 있을 때 `control_action`은 무엇인가요?
+6. 큐브가 화면 중앙 근처에 들어오면 어떤 action이 표시되나요?
+
+### 챌린지: 가상 gripper 제어 명령 관찰
+
+화면 중앙의 십자는 가상의 gripper 목표점입니다. 빨간 큐브를 여러 위치로 옮기고 action이 어떻게 바뀌는지 기록하세요.
+
+| 큐브 위치 | 예상 action | 실제 action |
+|---|---|---|
+| 중앙보다 왼쪽 | `MOVE LEFT` | |
+| 중앙보다 오른쪽 | `MOVE RIGHT` | |
+| 중앙보다 위 | `MOVE UP` | |
+| 중앙보다 아래 | `MOVE DOWN` | |
+| 중앙 근처 | `CENTERED - CLOSE` | |
 
 ## 실습 2: End-to-End Dataset 수집
 
@@ -70,7 +87,7 @@ close:
 실행:
 
 ```bash
-python scripts/train_e2e_policy.py --dataset data/e2e_red_cube --epochs 12 --model-out models/e2e_red_cube_policy.pt
+python scripts/train_e2e_policy.py --dataset data/e2e_red_cube --epochs 20 --model-out models/e2e_red_cube_policy.pt
 ```
 
 기록:

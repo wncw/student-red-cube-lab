@@ -6,7 +6,7 @@ from pathlib import Path
 import cv2
 import torch
 
-from lesson_common import ACTION_LABELS, clamp01, draw_crosshair, draw_text_panel, open_camera, resize_for_display
+from lesson_common import ACTION_LABELS, clamp01, draw_text_panel, draw_virtual_gripper, open_camera, resize_for_display
 from tiny_policy import load_policy_checkpoint, normalized_state, preprocess_frame, select_device
 
 
@@ -63,7 +63,9 @@ def main() -> None:
                 break
 
             with torch.no_grad():
-                image = preprocess_frame(frame, image_size=image_size, device=device)
+                model_frame = frame.copy()
+                draw_virtual_gripper(model_frame, cursor_x, cursor_y)
+                image = preprocess_frame(model_frame, image_size=image_size, device=device)
                 state = normalized_state(cursor_x, cursor_y, device=device)
                 logits = model(image, state)
                 probs = torch.softmax(logits, dim=1)[0].detach().cpu()
@@ -75,12 +77,9 @@ def main() -> None:
                 cursor_x, cursor_y = apply_action_to_cursor(predicted_label, cursor_x, cursor_y, args.cursor_step)
 
             display = frame.copy()
-            h, w = display.shape[:2]
-            cursor_px = int(cursor_x * (w - 1))
-            cursor_py = int(cursor_y * (h - 1))
             color = (0, 255, 0) if predicted_label == "close" else (255, 255, 0)
-            draw_crosshair(display, cursor_px, cursor_py, color)
-            cv2.rectangle(display, (cursor_px - 36, cursor_py - 36), (cursor_px + 36, cursor_py + 36), color, 2)
+            cursor_px, cursor_py = draw_virtual_gripper(display, cursor_x, cursor_y)
+            cv2.rectangle(display, (cursor_px - 42, cursor_py - 42), (cursor_px + 42, cursor_py + 42), color, 2)
 
             sorted_probs = sorted(zip(label_names, probs.tolist()), key=lambda item: item[1], reverse=True)
             top_lines = [f"{label}: {prob:.2f}" for label, prob in sorted_probs[:3]]
@@ -119,4 +118,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

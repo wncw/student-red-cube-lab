@@ -12,7 +12,7 @@ from lesson_common import (
     ACTION_LABELS,
     LABEL_KEYS,
     clamp01,
-    draw_crosshair,
+    draw_virtual_gripper,
     draw_text_panel,
     ensure_dir,
     open_camera,
@@ -87,7 +87,7 @@ def main() -> None:
                 "state": ["cursor_x_normalized", "cursor_y_normalized"],
             },
             "action_labels": ACTION_LABELS,
-            "note": "Images are saved without the virtual cursor overlay. Cursor state is stored separately.",
+            "note": "Images include the virtual gripper marker. Cursor state is also stored separately.",
         },
     )
 
@@ -113,11 +113,7 @@ def main() -> None:
                 break
 
             display = frame.copy()
-            h, w = display.shape[:2]
-            cursor_px = int(cursor_x * (w - 1))
-            cursor_py = int(cursor_y * (h - 1))
-            draw_crosshair(display, cursor_px, cursor_py, (255, 255, 0))
-            cv2.rectangle(display, (cursor_px - 36, cursor_py - 36), (cursor_px + 36, cursor_py + 36), (255, 255, 0), 2)
+            draw_virtual_gripper(display, cursor_x, cursor_y)
 
             count_line = " ".join([f"{label}:{counts[label]}" for label in ACTION_LABELS])
             draw_text_panel(
@@ -148,7 +144,9 @@ def main() -> None:
                 cursor_y = clamp01(cursor_y + args.cursor_step)
             elif key in LABEL_KEYS:
                 label = LABEL_KEYS[key]
-                saved = cv2.resize(frame, (args.save_width, args.save_height), interpolation=cv2.INTER_AREA)
+                saved_frame = frame.copy()
+                draw_virtual_gripper(saved_frame, cursor_x, cursor_y)
+                saved = cv2.resize(saved_frame, (args.save_width, args.save_height), interpolation=cv2.INTER_AREA)
                 image_name = f"sample_{sample_index:06d}.jpg"
                 image_path = images_dir / image_name
                 cv2.imwrite(str(image_path), saved, [cv2.IMWRITE_JPEG_QUALITY, 92])
@@ -177,4 +175,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

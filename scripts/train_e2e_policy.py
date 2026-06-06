@@ -16,7 +16,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from tqdm import tqdm
 
 from lesson_common import ACTION_LABELS, ensure_dir
-from tiny_policy import TinyVisuomotorPolicy, select_device
+from tiny_policy import TinyVisuomotorPolicy, bgr_frame_to_chw, select_device
 
 
 class RedCubeActionDataset(Dataset):
@@ -55,9 +55,7 @@ class RedCubeActionDataset(Dataset):
         if self.augment:
             frame = self._augment(frame)
 
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
-        rgb = (rgb - 0.5) / 0.5
-        image = torch.from_numpy(np.transpose(rgb, (2, 0, 1))).float()
+        image = torch.from_numpy(bgr_frame_to_chw(frame, self.image_size)).float()
 
         cursor_x = float(row["cursor_x"])
         cursor_y = float(row["cursor_y"])
@@ -84,7 +82,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-out", type=Path, default=Path("models/e2e_red_cube_policy.pt"))
     parser.add_argument("--summary-out", type=Path, default=Path("models/e2e_red_cube_training_summary.json"))
     parser.add_argument("--image-size", type=int, default=96)
-    parser.add_argument("--epochs", type=int, default=12)
+    parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--val-ratio", type=float, default=0.2)
@@ -228,4 +226,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
