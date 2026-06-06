@@ -74,6 +74,14 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+Windows에서 `torch` 관련 `WinError 1114`가 나오면 CPU 전용 PyTorch로 재설치합니다.
+
+```powershell
+python -m pip uninstall -y torch
+python -m pip cache purge
+python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+```
+
 `Activate.ps1` 실행 중 `PSSecurityException` 보안 오류가 나오면 아래 명령어를 먼저 실행한 뒤 다시 activate 합니다.
 
 ```powershell

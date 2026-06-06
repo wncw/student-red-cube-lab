@@ -240,6 +240,48 @@ python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --w
 2. 설치가 실패하면 OpenCV 직접 방식만 먼저 진행합니다.
 3. End-to-End 부분은 강사가 미리 학습한 checkpoint를 준비합니다.
 
+## Windows에서 torch WinError 1114가 발생함
+
+증상:
+
+```text
+OSError: [WinError 1114] DLL 초기화 루틴을 실행할 수 없습니다
+```
+
+경로에 `torch`가 보이면 PyTorch DLL 로딩 문제일 가능성이 큽니다. 이 실습은 GPU가 필요 없으므로 CPU 전용 PyTorch로 재설치하는 것이 가장 안정적입니다.
+
+PowerShell에서 프로젝트 폴더 기준으로 실행합니다.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip uninstall -y torch
+.\.venv\Scripts\python.exe -m pip cache purge
+.\.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+```
+
+설치 확인:
+
+```powershell
+.\.venv\Scripts\python.exe -c "import torch; print(torch.__version__); print('torch ok')"
+```
+
+그다음 다시 학습합니다.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\train_e2e_policy.py --dataset data\e2e_red_cube --epochs 20 --model-out models\e2e_red_cube_policy.pt
+```
+
+그래도 같은 오류가 나면 Microsoft Visual C++ Redistributable x64를 설치한 뒤 PowerShell을 새로 열어 다시 확인합니다.
+
+https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+Python 버전도 확인합니다.
+
+```powershell
+.\.venv\Scripts\python.exe --version
+```
+
+권장 버전은 Python 3.9~3.11입니다.
+
 ## OpenCV 창에서 키 입력이 안 먹음
 
 OpenCV 창이 활성화되어 있어야 합니다. 마우스로 영상 창을 한 번 클릭한 뒤 키를 누릅니다.
