@@ -122,6 +122,12 @@ python scripts/direct_red_cube_tracker.py --camera 0 --width 1280 --height 720 -
 python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720
 ```
 
+기존 dataset을 지우고 새로 수집하려면 `--reset`을 붙입니다.
+
+```bash
+python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --reset
+```
+
 키:
 
 | 키 | 의미 |

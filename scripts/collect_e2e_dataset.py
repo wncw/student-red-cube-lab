@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import shutil
 import time
 from pathlib import Path
 from typing import Dict
@@ -34,6 +35,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--save-height", type=int, default=240, help="Stored image height for training.")
     parser.add_argument("--display-width", type=int, default=1280, help="Resize window for display only.")
     parser.add_argument("--cursor-step", type=float, default=0.035, help="Virtual cursor move step in normalized coordinates.")
+    parser.add_argument("--reset", action="store_true", help="Delete the dataset directory before collecting new samples.")
     return parser.parse_args()
 
 
@@ -55,9 +57,19 @@ def load_counts(labels_path: Path) -> Dict[str, int]:
         reader = csv.DictReader(f)
         for row in reader:
             label = row.get("label")
-            if label in counts:
+            image = row.get("image")
+            image_exists = image is not None and (labels_path.parent / image).exists()
+            if label in counts and image_exists:
                 counts[label] += 1
     return counts
+
+
+def labels_has_rows(labels_path: Path) -> bool:
+    if not labels_path.exists():
+        return False
+    with labels_path.open("r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        return any(True for _ in reader)
 
 
 def append_row(labels_path: Path, row: Dict[str, object]) -> None:
@@ -72,6 +84,9 @@ def append_row(labels_path: Path, row: Dict[str, object]) -> None:
 
 def main() -> None:
     args = parse_args()
+    if args.reset and args.dataset.exists():
+        shutil.rmtree(args.dataset)
+
     dataset_dir = ensure_dir(args.dataset)
     images_dir = ensure_dir(dataset_dir / "images")
     labels_path = dataset_dir / "labels.csv"
@@ -93,6 +108,12 @@ def main() -> None:
 
     cap = open_camera(args.camera, args.width, args.height, args.fps, args.backend)
     sample_index = next_sample_index(images_dir)
+    if sample_index == 0 and labels_has_rows(labels_path):
+        raise RuntimeError(
+            "labels.csv exists but no sample images were found. "
+            "This usually means only the images were deleted. "
+            "Run this script with --reset or delete the whole dataset directory."
+        )
     counts = load_counts(labels_path)
     cursor_x = 0.5
     cursor_y = 0.5

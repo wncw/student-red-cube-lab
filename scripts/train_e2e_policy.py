@@ -33,12 +33,23 @@ class RedCubeActionDataset(Dataset):
         with labels_path.open("r", newline="", encoding="utf-8") as f:
             rows = list(csv.DictReader(f))
         valid_rows = []
+        image_refs = Counter()
         for row in rows:
             image_path = self.dataset_dir / row["image"]
             if row.get("label") in ACTION_LABELS and image_path.exists():
                 valid_rows.append(row)
+                image_refs[row["image"]] += 1
         if not valid_rows:
             raise RuntimeError("No valid samples found. Collect data first.")
+        duplicates = [image for image, count in image_refs.items() if count > 1]
+        if duplicates:
+            examples = ", ".join(duplicates[:5])
+            raise RuntimeError(
+                "Duplicate image references were found in labels.csv. "
+                "The dataset may not have been reset cleanly. "
+                f"Examples: {examples}. "
+                "Collect again with collect_e2e_dataset.py --reset."
+            )
         return valid_rows
 
     def __len__(self) -> int:

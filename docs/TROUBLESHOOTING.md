@@ -191,6 +191,24 @@ close: 80
 - 최소 label별 20장, 가능하면 40장 이상 수집합니다.
 - cursor 위치와 큐브 위치를 다양하게 바꿉니다.
 
+## Dataset을 새로 만들었는데 label count가 누적됨
+
+원인:
+
+- `images/` 폴더만 지우고 `labels.csv`가 남아 있음
+- 새 이미지 파일명이 `sample_000000.jpg`부터 다시 만들어지면서 예전 label row가 새 이미지에 연결됨
+- 같은 image path가 `labels.csv`에 여러 번 들어감
+
+해결:
+
+새로 수집할 때는 `--reset`을 붙여 전체 dataset 폴더를 초기화합니다.
+
+```bash
+python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --reset
+```
+
+이미 꼬인 dataset은 학습에 쓰지 말고 새로 수집하는 것이 안전합니다.
+
 ## 학습 정확도는 높은데 실시간 추론이 틀림
 
 가능한 원인:

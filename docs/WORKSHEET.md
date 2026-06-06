@@ -54,6 +54,12 @@ dy =
 python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720
 ```
 
+새 dataset으로 다시 시작할 때:
+
+```bash
+python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --reset
+```
+
 키:
 
 | 키 | 의미 |
