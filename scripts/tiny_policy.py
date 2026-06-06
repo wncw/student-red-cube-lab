@@ -12,7 +12,7 @@ from torch import nn
 class TinyVisuomotorPolicy(nn.Module):
     def __init__(self, num_actions: int, state_dim: int = 2) -> None:
         super().__init__()
-        image_feature_dim = 96 * 4 * 4
+        image_feature_dim = 96 * 3 * 3
         self.image_encoder = nn.Sequential(
             nn.Conv2d(5, 16, kernel_size=5, stride=2, padding=2),
             nn.BatchNorm2d(16),
@@ -26,7 +26,7 @@ class TinyVisuomotorPolicy(nn.Module):
             nn.Conv2d(64, 96, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(96),
             nn.ReLU(inplace=True),
-            nn.AdaptiveAvgPool2d((4, 4)),
+            nn.AdaptiveAvgPool2d((3, 3)),
             nn.Flatten(),
         )
         self.state_encoder = nn.Sequential(
