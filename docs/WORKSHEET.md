@@ -54,10 +54,10 @@ dy =
 python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720
 ```
 
-새 dataset으로 다시 시작할 때:
+기본값은 같은 dataset 폴더를 비우고 새로 수집합니다. 기존 dataset에 이어서 추가 수집할 때만 `--append`를 붙입니다.
 
 ```bash
-python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --reset
+python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --append
 ```
 
 키:

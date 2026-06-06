@@ -201,13 +201,19 @@ close: 80
 
 해결:
 
-새로 수집할 때는 `--reset`을 붙여 전체 dataset 폴더를 초기화합니다.
+최신 코드에서는 `collect_e2e_dataset.py`가 기본적으로 전체 dataset 폴더를 초기화하고 새로 수집합니다.
 
 ```bash
-python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --reset
+python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720
 ```
 
-이미 꼬인 dataset은 학습에 쓰지 말고 새로 수집하는 것이 안전합니다.
+기존 dataset에 이어서 추가 수집할 때만 `--append`를 붙입니다.
+
+```bash
+python scripts/collect_e2e_dataset.py --camera 0 --dataset data/e2e_red_cube --width 1280 --height 720 --append
+```
+
+이미 꼬인 dataset은 학습에 쓰지 말고 기본 명령으로 새로 수집하는 것이 안전합니다.
 
 ## 학습 정확도는 높은데 실시간 추론이 틀림
 

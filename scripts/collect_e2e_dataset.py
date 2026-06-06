@@ -35,7 +35,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--save-height", type=int, default=240, help="Stored image height for training.")
     parser.add_argument("--display-width", type=int, default=1280, help="Resize window for display only.")
     parser.add_argument("--cursor-step", type=float, default=0.035, help="Virtual cursor move step in normalized coordinates.")
-    parser.add_argument("--reset", action="store_true", help="Delete the dataset directory before collecting new samples.")
+    parser.add_argument("--append", action="store_true", help="Append samples to an existing dataset instead of resetting it.")
+    parser.add_argument("--reset", action="store_true", help=argparse.SUPPRESS)
     return parser.parse_args()
 
 
@@ -84,9 +85,14 @@ def append_row(labels_path: Path, row: Dict[str, object]) -> None:
 
 def main() -> None:
     args = parse_args()
-    if args.reset and args.dataset.exists():
+    if args.reset and args.append:
+        raise RuntimeError("Use either --append or --reset, not both.")
+
+    cap = open_camera(args.camera, args.width, args.height, args.fps, args.backend)
+    if args.dataset.exists() and not args.append:
         shutil.rmtree(args.dataset)
 
+    collection_mode = "append existing dataset" if args.append else "new dataset (reset)"
     dataset_dir = ensure_dir(args.dataset)
     images_dir = ensure_dir(dataset_dir / "images")
     labels_path = dataset_dir / "labels.csv"
@@ -96,6 +102,7 @@ def main() -> None:
         metadata_path,
         {
             "created_or_updated_at": timestamp_string(),
+            "collection_mode": collection_mode,
             "task": "red cube virtual-gripper action labeling",
             "observation": {
                 "image": [args.save_height, args.save_width, 3],
@@ -106,13 +113,13 @@ def main() -> None:
         },
     )
 
-    cap = open_camera(args.camera, args.width, args.height, args.fps, args.backend)
     sample_index = next_sample_index(images_dir)
     if sample_index == 0 and labels_has_rows(labels_path):
+        cap.release()
         raise RuntimeError(
             "labels.csv exists but no sample images were found. "
             "This usually means only the images were deleted. "
-            "Run this script with --reset or delete the whole dataset directory."
+            "Run this script without --append to reset, or delete the whole dataset directory."
         )
     counts = load_counts(labels_path)
     cursor_x = 0.5
@@ -125,6 +132,7 @@ def main() -> None:
     print("  cursor: j=left l=right i=up k=down c=center")
     print("  quit: q or ESC")
     print(f"Dataset: {dataset_dir.resolve()}")
+    print(f"Mode: {collection_mode}")
 
     try:
         while True:
@@ -141,6 +149,7 @@ def main() -> None:
                 display,
                 [
                     "End-to-End dataset collection",
+                    f"Mode: {collection_mode}",
                     "Label: a left | d right | w up | s down | space close",
                     "Cursor: j/l/i/k move | c center",
                     f"cursor=({cursor_x:.2f}, {cursor_y:.2f}) last={last_label}",
